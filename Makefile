@@ -18,5 +18,8 @@ nucleation: nucleation.cpp
 parallel: nucleation.cpp
 	$(pcompiler) $(pflags) $< -o $@ -lz
 
+debug: flags += -O0 -g
+debug: nucleation
+
 clean:
 	rm -f nucleation parallel

@@ -8,70 +8,210 @@
 #include <cmath>
 #include "nucleation.hpp"
 
-namespace MMSP{
+const double meshres = 0.4;
+const double df = std::sqrt(2) / 30;
+const double r_star = std::sqrt(2) / (6 * df);
+const double dt = 0.125 * meshres*meshres / 2;
+
+double g(double x)
+{
+	return x*x * (1.0 - x)*(1.0 - x);
+}
+
+double p(double x)
+{
+	return x*x*x * (6.0 * x*x - 15.0 * x + 10.0);
+}
+
+double g_prime(double x)
+{
+	return 2.0 * x * (2.0 * x*x - 3.0 * x + 1.0);
+}
+
+double p_prime(double x)
+{
+	return 30.0 * g(x);
+}
+
+double pf_tanh(double r, double r0)
+{
+	return 0.5 * (1.0 - std::tanh((r - r0) / std::sqrt(2)));
+}
+
+namespace MMSP
+{
+
+template <int dim, typename T>
+double free_energy(grid<dim,T>& Grid)
+{
+	int rank = 0;
+	#ifdef MPI_VERSION
+	rank = MPI::COMM_WORLD.Get_rank();
+	#endif
+
+	double dV = 1.0;
+	for (int d = 0; d < dim; d++)
+		dV *= dx(Grid, d);
+
+	double energy = 0.0;
+
+	for (int n = 0; n < nodes(Grid); n++) {
+		vector<int> x = position(Grid, n);
+		double phi = Grid(n);
+		vector<T> grad_phi = gradient(Grid, x);
+		double grad_phi_sq = grad_phi * grad_phi;
+		energy += 0.5 * grad_phi_sq + g(phi) - df * p(phi);
+	}
+
+	energy *= dV;
+
+	#ifdef MPI_VERSION
+	double local(energy);
+	MPI::COMM_WORLD.Allreduce(&local, &energy, 1, MPI_DOUBLE, MPI_SUM);
+	#endif
+
+	return energy;
+}
+
+template <int dim, typename T>
+double solid_frac(grid<dim,T>& Grid)
+{
+	int rank = 0;
+	#ifdef MPI_VERSION
+	rank = MPI::COMM_WORLD.Get_rank();
+	#endif
+
+	double f = 0.0;
+    double N = nodes(Grid);
+
+	for (int n = 0; n < nodes(Grid); n++)
+		f += Grid(n);
+
+	#ifdef MPI_VERSION
+	double local(f);
+	MPI::COMM_WORLD.Allreduce(&local, &f, 1, MPI_DOUBLE, MPI_SUM);
+
+    local = N;
+	MPI::COMM_WORLD.Allreduce(&local, &N, 1, MPI_DOUBLE, MPI_SUM);
+	#endif
+
+	return f / N;
+}
 
 void generate(int dim, const char* filename)
 {
-	// srand() is called exactly once in MMSP.main.hpp. Do not call it here.
-	if (dim==1) {
-		int L=1024;
-		GRID1D initGrid(0,0,L);
+	int rank = 0;
+	#ifdef MPI_VERSION
+	rank = MPI::COMM_WORLD.Get_rank();
+	#endif
 
-		for (int i=0; i<nodes(initGrid); i++)
-			initGrid(i) = 1.0-2.0*double(rand())/double(RAND_MAX);
-
-		output(initGrid,filename);
-	}
+	FILE* fh;
 
 	if (dim==2) {
-		int L=256;
-		GRID2D initGrid(0,0,2*L,0,L);
+		if (rank == 0) {
+			std::cout << "dt = " << dt << std::endl;
+			std::cout << "Run " << std::ceil(1.00 / dt) << " steps to hit unit time, "
+			          << std::ceil(100. / dt) << " steps to 100." << std::endl;
+		}
 
-		for (int i=0; i<nodes(initGrid); i++)
-			initGrid(i) = 1.0-2.0*double(rand())/double(RAND_MAX);
+		const double r0 = 1.01 * r_star;
+		const double L = 100.0;
+		const int half_domain = std::ceil(L / (2.0 * meshres));
 
-		output(initGrid,filename);
+		GRID2D initGrid(0, -half_domain, half_domain, -half_domain, half_domain);
+
+		for (int d = 0; d < dim; d++) {
+            dx(initGrid, d) = meshres;
+			if (x0(initGrid, d) == g0(initGrid, d))
+				b0(initGrid, d) = Neumann;
+			if (x1(initGrid, d) == g1(initGrid, d))
+				b1(initGrid, d) = Neumann;
+		}
+
+		// Embed a single seed in the middle of the domain
+		for (int n = 0; n < nodes(initGrid); n++) {
+			const vector<int> x = position(initGrid, n);
+			const double r = meshres * std::sqrt(x * x);
+			initGrid(n) = pf_tanh(r, r0);
+		}
+
+		output(initGrid, filename);
+
+		double F = free_energy(initGrid);
+        double f = solid_frac(initGrid);
+
+		if (rank == 0) {
+			fh = fopen("free_energy.csv", "w+");
+			fprintf(fh, "time,energy,fraction\n");
+			fprintf(fh, "%f,%f,%f\n", 0.0, F, f);
+			fclose(fh);
+		}
 	}
 
-	if (dim==3) {
-		int L=64;
-		GRID3D initGrid(0,0,2*L,0,L,0,L/4);
-
-		for (int i=0; i<nodes(initGrid); i++)
-			initGrid(i) = 1.0-2.0*double(rand())/double(RAND_MAX);
-
-		output(initGrid,filename);
+	else {
+		if (rank == 0)
+			std::cout << "Error: The Benchmark is only defined for 2D." << std::endl;
+		Abort(EXIT_FAILURE);
 	}
 }
 
-template <int dim, typename T> void update(grid<dim,T>& oldGrid, int steps)
+template <int dim, typename T>
+void update(grid<dim,T>& oldGrid, int steps)
 {
-	int rank=0;
-    #ifdef MPI_VERSION
-    rank = MPI::COMM_WORLD.Get_rank();
-    #endif
+	FILE* fh;
+	int rank = 0;
+	static double elapsed = 0.0;
+
+	#ifdef MPI_VERSION
+	rank = MPI::COMM_WORLD.Get_rank();
+	#endif
 
 	ghostswap(oldGrid);
 
 	grid<dim,T> newGrid(oldGrid);
 
-	double r = 1.0;
-	double u = 1.0;
-	double K = 1.0;
-	double M = 1.0;
-	double dt = 0.01;
+	if (rank == 0)
+		fh = fopen("free_energy.csv", "a");
 
-	for (int step=0; step<steps; step++) {
+	for (int step = 0; step < steps; step++) {
 		if (rank==0)
 			print_progress(step, steps);
 
-		for (int i=0; i<nodes(oldGrid); i++) {
-			T phi = oldGrid(i);
-			newGrid(i) = phi-dt*M*(-r*phi+u*pow(phi,3)-K*laplacian(oldGrid,i));
+		for (int n = 0; n < nodes(oldGrid); n++) {
+            vector<int> x = position(oldGrid, n);
+			T phi = oldGrid(n);
+			newGrid(n) = phi + dt * (laplacian(oldGrid, x)
+			                         - g_prime(phi)
+			                         + df * p_prime(phi));
 		}
-		swap(oldGrid,newGrid);
+		swap(oldGrid, newGrid);
 		ghostswap(oldGrid);
+
+		elapsed += dt;
+		double F = free_energy(oldGrid);
+        double f = solid_frac(oldGrid);
+
+		if (rank == 0)
+			fprintf(fh, "%f,%f,%f\n", elapsed, F, f);
 	}
+
+	if (rank == 0)
+		fclose(fh);
+
+	double dV = 1.0;
+	for (int d = 0; d < dim; d++)
+		dV *= dx(oldGrid, d);
+
+    grid<dim,T> nrgGrid(oldGrid);
+    ghostswap(nrgGrid);
+    for (int n = 0; n < nodes(nrgGrid); n++) {
+        vector<int> x = position(nrgGrid, n);
+        double phi = oldGrid(x);
+		vector<T> grad_phi = gradient(oldGrid, x);
+		double grad_phi_sq = grad_phi * grad_phi;
+		nrgGrid(n) = dV * (0.5 * grad_phi_sq + g(phi) - df * p(phi));
+    }
+    output(nrgGrid, "energy.dat");
 }
 
 } // namespace MMSP
