@@ -8,11 +8,6 @@
 #include <cmath>
 #include "nucleation.hpp"
 
-const double meshres = 0.4;
-const double df = std::sqrt(2) / 30;
-const double r_star = std::sqrt(2) / (6 * df);
-const double dt = 0.125 * meshres*meshres / 2;
-
 double g(double x)
 {
 	return x*x * (1.0 - x)*(1.0 - x);
@@ -33,9 +28,9 @@ double p_prime(double x)
 	return 30.0 * g(x);
 }
 
-double pf_tanh(double r, double r0)
+double pf_tanh(double x, double r)
 {
-	return 0.5 * (1.0 - std::tanh((r - r0) / std::sqrt(2)));
+	return 0.5 * (1.0 - std::tanh((x - r) / std::sqrt(2)));
 }
 
 namespace MMSP
@@ -108,14 +103,13 @@ void generate(int dim, const char* filename)
 	FILE* fh;
 
 	if (dim==2) {
+        const double dt = stability * meshres*meshres / 2;
 		if (rank == 0) {
 			std::cout << "dt = " << dt << std::endl;
 			std::cout << "Run " << std::ceil(1.00 / dt) << " steps to hit unit time, "
 			          << std::ceil(100. / dt) << " steps to 100." << std::endl;
 		}
 
-		const double r0 = 1.01 * r_star;
-		const double L = 100.0;
 		const int half_domain = std::ceil(L / (2.0 * meshres));
 
 		GRID2D initGrid(0, -half_domain, half_domain, -half_domain, half_domain);
@@ -161,6 +155,7 @@ void update(grid<dim,T>& oldGrid, int steps)
 	FILE* fh;
 	int rank = 0;
 	static double elapsed = 0.0;
+    const double dt = stability * meshres*meshres / 2;
 
 	#ifdef MPI_VERSION
 	rank = MPI::COMM_WORLD.Get_rank();
@@ -218,4 +213,4 @@ void update(grid<dim,T>& oldGrid, int steps)
 
 #endif
 
-#include"MMSP.main.hpp"
+#include "MMSP.main.hpp"
