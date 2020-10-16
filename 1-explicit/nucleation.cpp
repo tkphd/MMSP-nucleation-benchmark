@@ -107,7 +107,8 @@ void generate(int dim, const char* filename)
 		if (rank == 0) {
 			std::cout << "dt = " << dt << std::endl;
 			std::cout << "Run " << std::ceil(1.00 / dt) << " steps to hit unit time, "
-			          << std::ceil(100. / dt) << " steps to 100." << std::endl;
+			          << std::ceil(100. / dt) << " steps to 100, "
+                      << std::ceil(200. / dt) << " steps to 200." << std::endl;
 		}
 
 		const int half_domain = std::ceil(L / (2.0 * meshres));
