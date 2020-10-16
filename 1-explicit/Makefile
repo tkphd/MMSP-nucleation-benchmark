@@ -11,7 +11,7 @@ pcompiler = mpic++
 flags = -O3 -I $(incdir)
 pflags = $(flags) -include mpi.h
 
-all: nuc8.1a nuc8.1b nuc8.1c
+all: nuc8.1a nuc8.1b nuc8.1c nuc8.1d1 nuc8.1d2 nuc8.1d3 nuc8.1d4 nuc8.1d5
 .PHONY: all clean
 
 # default program
@@ -22,18 +22,31 @@ nucleation: nucleation.cpp nucleation.hpp
 	$(pcompiler) $(pflags) $< -include par8.1a.hpp -o $@ -lz
 
 # benchmark problems
-nuc8.1a: nucleation.cpp nucleation.hpp
+nuc8.1a: nucleation.cpp nucleation.hpp par8.1a.hpp
 	$(pcompiler) $(pflags) $< -include par8.1a.hpp -o $@ -lz
 
-nuc8.1b: nucleation.cpp nucleation.hpp
+nuc8.1b: nucleation.cpp nucleation.hpp par8.1b.hpp
 	$(pcompiler) $(pflags) $< -include par8.1b.hpp -o $@ -lz
 
-nuc8.1c: nucleation.cpp nucleation.hpp
+nuc8.1c: nucleation.cpp nucleation.hpp par8.1c.hpp
 	$(pcompiler) $(pflags) $< -include par8.1c.hpp -o $@ -lz
 
-nuc8.1d: nucleation.cpp nucleation.hpp
-	$(pcompiler) $(pflags) $< -include par8.1d.hpp -o $@ -lz
+nuc8.1d1: nucleation.cpp nucleation.hpp par8.1d1.hpp
+	$(pcompiler) $(pflags) $< -include par8.1d1.hpp -o $@ -lz
+
+nuc8.1d2: nucleation.cpp nucleation.hpp par8.1d2.hpp
+	$(pcompiler) $(pflags) $< -include par8.1d2.hpp -o $@ -lz
+
+nuc8.1d3: nucleation.cpp nucleation.hpp par8.1d3.hpp
+	$(pcompiler) $(pflags) $< -include par8.1d3.hpp -o $@ -lz
+
+nuc8.1d4: nucleation.cpp nucleation.hpp par8.1d4.hpp
+	$(pcompiler) $(pflags) $< -include par8.1d4.hpp -o $@ -lz
+
+nuc8.1d5: nucleation.cpp nucleation.hpp par8.1d5.hpp
+	$(pcompiler) $(pflags) $< -include par8.1d5.hpp -o $@ -lz
 
 # cleanup
 clean:
-	rm -vf debug nucleation nuc8.1a nuc8.1b nuc8.1c nuc8.1d
+	rm -vf debug nucleation nuc8.1a nuc8.1b nuc8.1c \
+           nuc8.1d1 nuc8.1d2 nuc8.1d3 nuc8.1d4 nuc8.1d5
