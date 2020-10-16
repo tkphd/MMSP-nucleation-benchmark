@@ -44,6 +44,8 @@ double free_energy(grid<dim,T>& Grid)
 	rank = MPI::COMM_WORLD.Get_rank();
 	#endif
 
+    grid<dim,T> nrgGrid(Grid);
+
 	double dV = 1.0;
 	for (int d = 0; d < dim; d++)
 		dV *= dx(Grid, d);
@@ -55,7 +57,9 @@ double free_energy(grid<dim,T>& Grid)
 		double phi = Grid(n);
 		vector<T> grad_phi = gradient(Grid, x);
 		double grad_phi_sq = grad_phi * grad_phi;
-		energy += 0.5 * grad_phi_sq + g(phi) - df * p(phi);
+        double dE = 0.5 * grad_phi_sq + g(phi) - df * p(phi);
+		energy += dE;;
+		nrgGrid(n) = dV * dE;
 	}
 
 	energy *= dV;
@@ -64,6 +68,8 @@ double free_energy(grid<dim,T>& Grid)
 	double local(energy);
 	MPI::COMM_WORLD.Allreduce(&local, &energy, 1, MPI_DOUBLE, MPI_SUM);
 	#endif
+
+    output(nrgGrid, "energy.dat");
 
 	return energy;
 }
