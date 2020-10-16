@@ -169,6 +169,8 @@ void update(grid<dim,T>& oldGrid, int steps)
 	if (rank == 0)
 		fh = fopen("free_energy.csv", "a");
 
+    const int io_steps = 0.5 / dt; // only write stats every half-unit of time
+
 	for (int step = 0; step < steps; step++) {
 		if (rank==0)
 			print_progress(step, steps);
@@ -184,11 +186,16 @@ void update(grid<dim,T>& oldGrid, int steps)
 		ghostswap(oldGrid);
 
 		elapsed += dt;
-		double F = free_energy(oldGrid);
-        double f = solid_frac(oldGrid);
 
-		if (rank == 0)
-			fprintf(fh, "%f,%f,%f\n", elapsed, F, f);
+        if (step % io_steps ==0 || step == steps-1) {
+            double F = free_energy(oldGrid);
+            double f = solid_frac(oldGrid);
+
+            if (rank == 0) {
+                fprintf(fh, "%f,%f,%f\n", elapsed, F, f);
+                fflush(fh);
+            }
+        }
 	}
 
 	if (rank == 0)
