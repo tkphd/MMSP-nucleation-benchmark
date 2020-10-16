@@ -82,7 +82,7 @@ double solid_frac(grid<dim,T>& Grid)
 	rank = MPI::COMM_WORLD.Get_rank();
 	#endif
 
-	double f = 0.0;
+    double f = 0.0;
     double N = nodes(Grid);
 
 	for (int n = 0; n < nodes(Grid); n++)
@@ -135,6 +135,8 @@ void generate(int dim, const char* filename)
 			const double r = meshres * std::sqrt(x * x);
 			initGrid(n) = pf_tanh(r, r0);
 		}
+
+        ghostswap(initGrid);
 
 		output(initGrid, filename);
 
