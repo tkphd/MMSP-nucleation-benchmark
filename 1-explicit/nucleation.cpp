@@ -164,6 +164,7 @@ void update(grid<dim,T>& oldGrid, int steps)
 	FILE* fh;
 	int rank = 0;
 	static double elapsed = 0.0;
+	static double io_elapsed = 0.5; // only write stats every half-unit of time
     const double dt = stability * meshres*meshres / 2;
 
 	#ifdef MPI_VERSION
@@ -176,8 +177,6 @@ void update(grid<dim,T>& oldGrid, int steps)
 
 	if (rank == 0)
 		fh = fopen("free_energy.csv", "a");
-
-    const int io_steps = 0.5 / dt; // only write stats every half-unit of time
 
 	for (int step = 0; step < steps; step++) {
 		if (rank==0)
@@ -195,7 +194,8 @@ void update(grid<dim,T>& oldGrid, int steps)
 
 		elapsed += dt;
 
-        if (step % io_steps ==0 || step == steps-1) {
+        if (elapsed > io_elapsed || step == steps-1) {
+        	io_elapsed += 0.5;
             double F = free_energy(oldGrid);
             double f = solid_frac(oldGrid);
 
