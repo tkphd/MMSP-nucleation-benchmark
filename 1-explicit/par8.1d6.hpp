@@ -3,7 +3,7 @@
 
 #include <cmath>
 
-const double meshres = 0.025;
+const double meshres = 0.0125;
 const double L = 100.0;
 const double df = std::sqrt(2) / 30;
 const double r_star = std::sqrt(2) / (6 * df);

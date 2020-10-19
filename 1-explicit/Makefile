@@ -11,7 +11,7 @@ pcompiler = mpic++
 flags = -O3 -I $(incdir)
 pflags = $(flags) -include mpi.h
 
-all: nuc8.1a nuc8.1b nuc8.1c nuc8.1d1 nuc8.1d2 nuc8.1d3 nuc8.1d4 nuc8.1d5 nuc8.1d6 nuc8.1d7 nuc8.1d8
+all: nuc8.1a nuc8.1b nuc8.1c nuc8.1d1 nuc8.1d2 nuc8.1d3 nuc8.1d4 nuc8.1d5 nuc8.1d6 nuc8.1d7
 .PHONY: all clean
 
 # default program
@@ -52,11 +52,8 @@ nuc8.1d6: nucleation.cpp nucleation.hpp par8.1d6.hpp
 nuc8.1d7: nucleation.cpp nucleation.hpp par8.1d7.hpp
 	$(pcompiler) $(pflags) $< -include par8.1d7.hpp -o $@ -lz
 
-nuc8.1d8: nucleation.cpp nucleation.hpp par8.1d8.hpp
-	$(pcompiler) $(pflags) $< -include par8.1d8.hpp -o $@ -lz
-
 # cleanup
 clean:
 	rm -vf debug nucleation nuc8.1a nuc8.1b nuc8.1c \
            nuc8.1d1 nuc8.1d2 nuc8.1d3 nuc8.1d4 \
-           nuc8.1d5 nuc8.1d6 nuc8.1d7 nuc8.1d8
+           nuc8.1d5 nuc8.1d6 nuc8.1d7
