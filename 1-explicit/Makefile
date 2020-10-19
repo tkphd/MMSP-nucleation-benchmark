@@ -11,10 +11,12 @@ pcompiler = mpic++
 flags = -O3 -I $(incdir)
 pflags = $(flags) -include mpi.h
 
-all: nuc8.1a nuc8.1b nuc8.1c nuc8.1d1 nuc8.1d2 nuc8.1d3 nuc8.1d4 nuc8.1d5 nuc8.1d6 nuc8.1d7
+all: mmsp2norm nuc8.1a nuc8.1b nuc8.1c nuc8.1d1 nuc8.1d2 nuc8.1d3 nuc8.1d4 nuc8.1d5 nuc8.1d6 nuc8.1d7
 .PHONY: all clean
 
-# default program
+mmsp2norm: mmsp2norm.cpp nucleation.hpp
+	$(compiler) $(flags) $< -o $@ -lz
+
 debug: nucleation.cpp nucleation.hpp par8.1a.hpp
 	$(compiler) $(flags) -O0 -g $< -include par8.1a.hpp -o $@ -lz
 
