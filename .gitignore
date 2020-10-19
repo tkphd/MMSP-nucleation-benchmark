@@ -1,2 +1,8 @@
+# binaries
 1-explicit/nuc8.1*
+1-explicit/mmsp2norm
+
+# output
 1-explicit/run-*
+*.dat
+*.vti
