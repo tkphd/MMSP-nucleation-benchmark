@@ -58,7 +58,7 @@ double free_energy(grid<dim,T>& Grid)
 		vector<T> grad_phi = gradient(Grid, x);
 		double grad_phi_sq = grad_phi * grad_phi;
         double dE = 0.5 * grad_phi_sq + g(phi) - df * p(phi);
-		energy += dE;;
+		energy += dE;
 		nrgGrid(n) = dV * dE;
 	}
 

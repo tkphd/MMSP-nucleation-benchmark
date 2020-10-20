@@ -56,6 +56,7 @@ nuc8.1d7: nucleation.cpp nucleation.hpp par8.1d7.hpp
 
 # cleanup
 clean:
-	rm -vf debug nucleation nuc8.1a nuc8.1b nuc8.1c \
+	rm -vf debug mmsp2norm nucleation \
+           nuc8.1a nuc8.1b nuc8.1c \
            nuc8.1d1 nuc8.1d2 nuc8.1d3 nuc8.1d4 \
            nuc8.1d5 nuc8.1d6 nuc8.1d7
