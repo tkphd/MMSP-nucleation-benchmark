@@ -146,7 +146,7 @@ void generate(int dim, const char* filename)
 		if (rank == 0) {
 			fh = fopen("free_energy.csv", "w+");
 			fprintf(fh, "time,energy,fraction\n");
-			fprintf(fh, "%f,%f,%f\n", 0.0, F, f);
+			fprintf(fh, "%lf,%lf,%lf\n", 0.0, F, f);
 			fclose(fh);
 		}
 	}
@@ -200,7 +200,7 @@ void update(grid<dim,T>& oldGrid, int steps)
             double f = solid_frac(oldGrid);
 
             if (rank == 0) {
-                fprintf(fh, "%f,%f,%f\n", elapsed, F, f);
+                fprintf(fh, "%lf,%lf,%lf\n", elapsed, F, f);
                 fflush(fh);
             }
         }

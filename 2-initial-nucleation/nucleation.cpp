@@ -216,7 +216,7 @@ void generate(int dim, const char* filename)
 		if (rank == 0) {
 			fh = fopen("free_energy.csv", "w+");
 			fprintf(fh, "time,energy,fraction,particles\n");
-			fprintf(fh, "%f,%f,%f,%d\n", 0.0, F, f, count);
+			fprintf(fh, "%lf,%lf,%lf,%d\n", 0.0, F, f, count);
 			fclose(fh);
 		}
 	}
@@ -273,7 +273,7 @@ void update(grid<dim,T>& oldGrid, int steps)
             int count = count_particles(oldGrid);
 
             if (rank == 0) {
-                fprintf(fh, "%f,%f,%f,%d\n", elapsed, F, f, count);
+                fprintf(fh, "%lf,%lf,%lf,%d\n", elapsed, F, f, count);
                 fflush(fh);
             }
         }

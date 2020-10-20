@@ -193,7 +193,7 @@ void generate(int dim, const char* filename)
                 const int x = x_distr(generator);
                 const int y = x_distr(generator);
 
-                fprintf(fh, "%f,%d,%d\n", t, x, y);
+                fprintf(fh, "%lf,%d,%d\n", t, x, y);
             }
 
             fclose(fh);
@@ -211,7 +211,7 @@ void generate(int dim, const char* filename)
 		if (rank == 0) {
 			fh = fopen("free_energy.csv", "w+");
 			fprintf(fh, "time,energy,fraction,particles\n");
-			fprintf(fh, "%f,%f,%f,%d\n", 0.0, F, f, count);
+			fprintf(fh, "%lf,%lf,%lf,%d\n", 0.0, F, f, count);
 			fclose(fh);
 		}
 	}
@@ -243,7 +243,7 @@ void update(grid<dim,T>& oldGrid, int steps)
     for (int i = 0; i < 25; i++) {
         vector<int> x(2);
         double t;
-        fscanf(fh, "%f,%d,%d\n", &t, &x[0], &x[1]);
+        fscanf(fh, "%lf,%d,%d\n", &t, &x[0], &x[1]);
         seeds[t] = x;
     }
 
@@ -274,7 +274,7 @@ void update(grid<dim,T>& oldGrid, int steps)
 
 		elapsed += dt;
 
-        while (elapsed <= seed->first) {
+        while (elapsed >= seed->first) {
             embed_at(oldGrid, seed->second, r0);
             ghostswap(oldGrid);
             seed++;
@@ -287,7 +287,7 @@ void update(grid<dim,T>& oldGrid, int steps)
             int count = count_particles(oldGrid);
 
             if (rank == 0) {
-                fprintf(fh, "%f,%f,%f,%d\n", elapsed, F, f, count);
+                fprintf(fh, "%lf,%lf,%lf,%d\n", elapsed, F, f, count);
                 fflush(fh);
             }
         }
