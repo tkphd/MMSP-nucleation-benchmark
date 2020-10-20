@@ -130,14 +130,14 @@ int count_particles(grid<dim,T>& Grid)
         img.atXY(X[0], X[1]) = phi;
     }
 
-    // img.save("init.png");
-    img.label(0, 0);
+    cimg_library::CImg<short> lbl(img);
+    lbl.label(0, 0);
 
     cimg_forXY(img, x, y) {
-        shades.insert(img(x, y));
+        if (img(x, y) > 0)
+            shades.insert(lbl(x, y));
     }
 
-    shades.erase(short(0));
     return shades.size();
 }
 
