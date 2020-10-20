@@ -214,10 +214,9 @@ void generate(int dim, const char* filename)
         double f = solid_frac(initGrid);
 
 		if (rank == 0) {
-            std::cout << "Found " << count << " particles." << std::endl;
 			fh = fopen("free_energy.csv", "w+");
-			fprintf(fh, "time,energy,fraction\n");
-			fprintf(fh, "%f,%f,%f\n", 0.0, F, f);
+			fprintf(fh, "time,energy,fraction,particles\n");
+			fprintf(fh, "%f,%f,%f,%d\n", 0.0, F, f, count);
 			fclose(fh);
 		}
 	}
@@ -271,9 +270,10 @@ void update(grid<dim,T>& oldGrid, int steps)
         	io_elapsed += 0.5;
             double F = free_energy(oldGrid);
             double f = solid_frac(oldGrid);
+            int count = count_particles(oldGrid);
 
             if (rank == 0) {
-                fprintf(fh, "%f,%f,%f\n", elapsed, F, f);
+                fprintf(fh, "%f,%f,%f,%d\n", elapsed, F, f, count);
                 fflush(fh);
             }
         }
