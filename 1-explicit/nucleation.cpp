@@ -164,7 +164,7 @@ void update(grid<dim,T>& oldGrid, int steps)
 	FILE* fh;
 	int rank = 0;
 	static double elapsed = 0.0;
-	static double io_elapsed = 0.5; // only write stats every half-unit of time
+	static double io_elapsed = 0.5 - 1.0e-16; // only write stats every half-unit of time
     const double dt = stability * meshres*meshres / 2;
 
 	#ifdef MPI_VERSION

@@ -232,7 +232,7 @@ void update(grid<dim,T>& oldGrid, int steps)
 	rank = MPI::COMM_WORLD.Get_rank();
 	#endif
 	static double elapsed = 0.0;
-	static double io_elapsed = 1.0; // only write stats every unit of time
+	static double io_elapsed = 0.5 - 1.0e-16; // only write stats every half-unit of time
     const double dt = stability * meshres*meshres / 2;
 
     // Read in set of seeds
