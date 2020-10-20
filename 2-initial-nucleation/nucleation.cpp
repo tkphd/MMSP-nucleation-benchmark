@@ -234,7 +234,8 @@ void update(grid<dim,T>& oldGrid, int steps)
 	FILE* fh;
 	int rank = 0;
 	static double elapsed = 0.0;
-	static double io_elapsed = 0.5 - 1.0e-16; // only write stats every half-unit of time
+    const double io_dt = 1.0; // only write stats every unit of time
+	static double io_elapsed = io_dt - 1.0e-10;
     const double dt = stability * meshres*meshres / 2;
 
 	#ifdef MPI_VERSION
@@ -267,7 +268,7 @@ void update(grid<dim,T>& oldGrid, int steps)
 		elapsed += dt;
 
         if (elapsed >= io_elapsed || step == steps-1) {
-        	io_elapsed += 0.5;
+        	io_elapsed += io_dt;
             double F = free_energy(oldGrid);
             double f = solid_frac(oldGrid);
             int count = count_particles(oldGrid);

@@ -157,8 +157,8 @@ void generate(int dim, const char* filename)
 			std::cout << "r* = " << r_star << " and r0 = " << r0 << std::endl;
 			std::cout << "dt = " << dt << std::endl;
 			std::cout << "Run " << std::ceil(1.00 / dt) << " steps to hit unit time, "
-			          << std::ceil(100. / dt) << " steps to 100, "
-                      << std::ceil(200. / dt) << " steps to 200." << std::endl;
+			          << std::ceil(200. / dt) << " steps to 200, "
+                      << std::ceil(600. / dt) << " steps to 600." << std::endl;
 		}
 
 		const int half_domain = std::ceil(L / (2.0 * meshres));
@@ -232,7 +232,8 @@ void update(grid<dim,T>& oldGrid, int steps)
 	rank = MPI::COMM_WORLD.Get_rank();
 	#endif
 	static double elapsed = 0.0;
-	static double io_elapsed = 0.5 - 1.0e-16; // only write stats every half-unit of time
+    const double io_dt = 1.0; // only write stats every unit of time
+	static double io_elapsed = io_dt - 1.0e-10;
     const double dt = stability * meshres*meshres / 2;
 
     // Read in set of seeds
@@ -281,7 +282,7 @@ void update(grid<dim,T>& oldGrid, int steps)
         }
 
         if (elapsed >= io_elapsed || step == steps-1) {
-        	io_elapsed += 0.5;
+        	io_elapsed += io_dt;
             double F = free_energy(oldGrid);
             double f = solid_frac(oldGrid);
             int count = count_particles(oldGrid);
