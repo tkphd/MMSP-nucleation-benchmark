@@ -4,11 +4,11 @@
 
 #ifndef NUCLEATION_UPDATE
 #define NUCLEATION_UPDATE
-#include <CImg.h>
 #include <cmath>
 #include <random>
 #include <set>
 
+#include "CImg.h"
 #include "MMSP.hpp"
 #include "nucleation.hpp"
 
