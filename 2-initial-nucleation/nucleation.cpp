@@ -266,7 +266,7 @@ void update(grid<dim,T>& oldGrid, int steps)
 
 		elapsed += dt;
 
-        if (elapsed > io_elapsed || step == steps-1) {
+        if (elapsed >= io_elapsed || step == steps-1) {
         	io_elapsed += 0.5;
             double F = free_energy(oldGrid);
             double f = solid_frac(oldGrid);
