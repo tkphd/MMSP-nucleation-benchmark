@@ -4,5 +4,9 @@
 
 # output
 1-explicit/run-*
+*.csv
 *.dat
+
+# dataviz
+*.png
 *.vti
