@@ -2,6 +2,7 @@
 1-explicit/nuc8.1*
 1-explicit/mmsp2norm
 2-initial-nucleation/nucleation
+*.sh
 
 # output
 1-explicit/run-*

@@ -25,3 +25,11 @@ https://stackoverflow.com/a/40898020) on StackOverflow.
 ## 4-athermal
 
 This folder implements Problem 8.4: Athermal Nucleation.
+
+---
+
+CImg is distributed under the [CeCILL](
+https://opensource.org/licenses/CECILL-2.1) open-source software
+license. The remainder of this work was conducted by an employee of the
+Federal Government during the course of their normal duties, and is not
+subject to copyright protection within the United States of America.
