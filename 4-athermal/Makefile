@@ -9,7 +9,7 @@ incdir = $(MMSP_PATH)/include
 compiler = g++
 flags = -O3 -fopenmp -I $(incdir)
 
-all: mmsp2norm nuc8.4a nuc8.4b nuc8.4c nuc8.4d1 nuc8.4d2 nuc8.4d3 nuc8.4d4 nuc8.4d5 nuc8.4d6 nuc8.4d7
+all: mmsp2norm nuc8.4a nuc8.4b nuc8.4c nuc8.4d1 nuc8.4d2 nuc8.4d3 nuc8.4d4 nuc8.4d5 nuc8.4d6 nuc8.4d7 nuc8.4e
 .PHONY: all clean
 
 mmsp2norm: mmsp2norm.cpp nucleation.hpp
@@ -52,9 +52,12 @@ nuc8.4d6: nucleation.cpp nucleation.hpp par8.4d6.hpp
 nuc8.4d7: nucleation.cpp nucleation.hpp par8.4d7.hpp
 	$(compiler) $(flags) $< -include par8.4d7.hpp -o $@ -lz
 
+nuc8.4e: nucleation.cpp nucleation.hpp par8.4e.hpp
+	$(compiler) $(flags) $< -include par8.4e.hpp -o $@ -lz
+
 # cleanup
 clean:
 	rm -vf debug mmsp2norm nucleation \
            nuc8.4a nuc8.4b nuc8.4c \
            nuc8.4d1 nuc8.4d2 nuc8.4d3 nuc8.4d4 \
-           nuc8.4d5 nuc8.4d6 nuc8.4d7
+           nuc8.4d5 nuc8.4d6 nuc8.4d7 nuc8.4e

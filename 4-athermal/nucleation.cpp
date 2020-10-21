@@ -41,12 +41,17 @@ namespace MMSP
 {
 
 template <int dim, typename T>
-bool onPrewetBorder(const MMSP::grid<dim, T>& GRID, const vector<int>& x)
+T boundary_value(const MMSP::grid<dim, T>& GRID, const vector<int>& x)
 {
-    const bool in_range_x = (x[0] >= g0(GRID, 0) / 2) && (x[0] < g1(GRID, 0) / 2);
-    const bool in_range_y = (x[1] == g0(GRID, 1) - 1);
+    const bool on_boundary = (x[1] == g0(GRID, 1) - 1);
+    if (!on_boundary)
+        return GRID(x);
 
-    return in_range_x && in_range_y;
+    const bool on_prewet = (x[0] >= g0(GRID, 0) / 2) && (x[0] < g1(GRID, 0) / 2);
+    if (on_prewet)
+        return wetted;
+
+    return 0.0;
 }
 
 template <int dim, typename T>
@@ -60,8 +65,7 @@ T neu_laplacian(const MMSP::grid<dim, T>& GRID, const vector<int>& x)
         s[i] += 1;
         const T& yh = GRID(s);
         s[i] -= 2;
-        const T yl = onPrewetBorder(GRID, s) ? wetted :
-            (s[1] == g0(GRID, 1) - 1) ? 0.0 : GRID(s);
+        const T yl = boundary_value(GRID, s);
         s[i] += 1;
 
         double weight = 1.0 / (dx(GRID, i) * dx(GRID, i));
@@ -80,8 +84,7 @@ MMSP::vector<T> neu_gradient(const grid<dim, T>& GRID, const vector<int>& x)
         s[i] += 1;
         const T& yh = GRID(s);
         s[i] -= 2;
-        const T yl = onPrewetBorder(GRID, s) ? wetted :
-            (s[1] == g0(GRID, 1) - 1) ? 0.0 : GRID(s);
+        const T yl = boundary_value(GRID, s);
         s[i] += 1;
 
         double weight = 1.0 / (2.0 * dx(GRID, i));

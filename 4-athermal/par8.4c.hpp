@@ -2,7 +2,7 @@
 // Questions/comments to trevor.keller@nist.gov (Trevor Keller)
 #include <cmath>
 
-const double meshres = 0.1;
+const double meshres = 0.2;
 const double L = 40.0;
 const double df = 1.04 * std::sqrt(2) / 60;
 const double stability = 0.125;
