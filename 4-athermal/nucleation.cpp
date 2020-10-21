@@ -261,14 +261,21 @@ void update(grid<dim,T>& oldGrid, int steps)
     grid<dim,T> nrgGrid(oldGrid);
     ghostswap(nrgGrid);
 
-	#pragma omp parallel for
+    double nrg_tot = 0.0;
+
+	#pragma omp parallel for reduction(+:nrg_tot)
     for (int n = 0; n < nodes(nrgGrid); n++) {
         vector<int> x = position(nrgGrid, n);
         double phi = oldGrid(x);
 		vector<T> grad_phi = neu_gradient(oldGrid, x);
 		double grad_phi_sq = grad_phi * grad_phi;
-		nrgGrid(n) = dV * (0.5 * grad_phi_sq + g(phi) - df * p(phi));
+        double dE = dV * (0.5 * grad_phi_sq + g(phi) - df * p(phi));
+		nrgGrid(n) = dE;
+        nrg_tot += dE;
     }
+
+    for (int n = 0; n < nodes(nrgGrid); n++)
+        nrgGrid(n) /= nrg_tot;
 
     output(nrgGrid, "energy.dat");
 }
