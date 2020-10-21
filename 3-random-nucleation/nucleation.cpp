@@ -251,6 +251,8 @@ void update(grid<dim,T>& oldGrid, int steps)
     fclose(fh);
 
     std::map<double, vector<int> >::const_iterator seed = seeds.begin();
+    while (seed != seeds.end() && elapsed >= seed->first)
+        seed++;
 
 	grid<dim,T> newGrid(oldGrid);
 
@@ -275,7 +277,7 @@ void update(grid<dim,T>& oldGrid, int steps)
 
 		elapsed += dt;
 
-        while (elapsed >= seed->first) {
+        while (seed != seeds.end() && elapsed >= seed->first) {
             embed_at(oldGrid, seed->second, r0);
             ghostswap(oldGrid);
             seed++;
