@@ -178,7 +178,7 @@ void generate(int dim, const char* filename)
 		for (int n = 0; n < nodes(initGrid); n++)
             initGrid(n) = 0.0;
 
-        // Generate random positions and times for 25 seeds
+        // Generate random positions and times for 100 seeds
 
         std::random_device                     rand_dev;
         std::mt19937                           generator(rand_dev());
@@ -188,7 +188,7 @@ void generate(int dim, const char* filename)
 		if (rank == 0) {
 			fh = fopen("seeds.csv", "w+");
 
-            for (int i = 0; i < 25; i++) {
+            for (int i = 0; i < 100; i++) {
                 const double t = t_distr(generator);
                 const int x = x_distr(generator);
                 const int y = x_distr(generator);
@@ -241,7 +241,7 @@ void update(grid<dim,T>& oldGrid, int steps)
 
     fh = fopen("seeds.csv", "r");
 
-    for (int i = 0; i < 25; i++) {
+    for (int i = 0; i < 100; i++) {
         vector<int> x(2);
         double t;
         fscanf(fh, "%lf,%d,%d\n", &t, &x[0], &x[1]);
