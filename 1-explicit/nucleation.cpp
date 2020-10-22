@@ -41,7 +41,7 @@ double free_energy(grid<dim,T>& Grid)
 {
 	int rank = 0;
 	#ifdef MPI_VERSION
-	rank = MPI::COMM_WORLD.Get_rank();
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	#endif
 
     grid<dim,T> nrgGrid(Grid);
@@ -66,7 +66,7 @@ double free_energy(grid<dim,T>& Grid)
 
 	#ifdef MPI_VERSION
 	double local(energy);
-	MPI::COMM_WORLD.Allreduce(&local, &energy, 1, MPI_DOUBLE, MPI_SUM);
+	MPI_Allreduce(&local, &energy, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 	#endif
 
     output(nrgGrid, "energy.dat");
@@ -79,7 +79,7 @@ double solid_frac(grid<dim,T>& Grid)
 {
 	int rank = 0;
 	#ifdef MPI_VERSION
-	rank = MPI::COMM_WORLD.Get_rank();
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	#endif
 
     double f = 0.0;
@@ -90,10 +90,10 @@ double solid_frac(grid<dim,T>& Grid)
 
 	#ifdef MPI_VERSION
 	double local(f);
-	MPI::COMM_WORLD.Allreduce(&local, &f, 1, MPI_DOUBLE, MPI_SUM);
+	MPI_Allreduce(&local, &f, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
     local = N;
-	MPI::COMM_WORLD.Allreduce(&local, &N, 1, MPI_DOUBLE, MPI_SUM);
+	MPI_Allreduce(&local, &N, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 	#endif
 
 	return f / N;
@@ -103,7 +103,7 @@ void generate(int dim, const char* filename)
 {
 	int rank = 0;
 	#ifdef MPI_VERSION
-	rank = MPI::COMM_WORLD.Get_rank();
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	#endif
 
 	FILE* fh;
@@ -169,7 +169,7 @@ void update(grid<dim,T>& oldGrid, int steps)
     const double dt = stability * meshres*meshres / 2;
 
 	#ifdef MPI_VERSION
-	rank = MPI::COMM_WORLD.Get_rank();
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	#endif
 
 	ghostswap(oldGrid);
