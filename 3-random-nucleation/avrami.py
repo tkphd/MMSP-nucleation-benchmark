@@ -48,35 +48,54 @@ def jmak_x(x):
 def jmak_y(y):
     return np.log(-np.log(1 - y))
 
-# === Avrami ===
+# === Avrami/JMAK Plots ===
 
 plt.figure(figsize=figsize)
 plt.title(title)
 plt.xlabel("$\\log(t)$")
 plt.ylabel("$\\log(-\\log(1-Y))$")
 
+for i, df in enumerate(frames):
+    df = df[df["time"] > 0]
+    df = df[df["fraction"] > 0]
+    plt.plot(jmak_x(df["time"]), jmak_y(df["fraction"]), color=colors[i], label=labels[i])
+
+# === Levenburg-Marquardt Least-Squares Fit ===
+
 fit_t = np.array([])
 fit_y = np.array([])
+
+K = []
+n = []
 
 for i, df in enumerate(frames):
     df = df[df["time"] > 0]
     df = df[df["fraction"] > 0]
-    x = jmak_x(df["time"])
-    y = jmak_y(df["fraction"])
-    plt.plot(x, y, color=colors[i], label=labels[i])
 
     fit_t = np.append(fit_t, df["time"])
     fit_y = np.append(fit_y, df["fraction"])
 
-# === Levenburg-Marquardt Least-Squares Fit ===
+    # Fit this dataset & print coeffs
+    p, pcov = curve_fit(f_jmak, df["time"], df["fraction"], sigma=None,
+                        method="lm", jac=df_jmak, maxfev=1000)
+    print(labels[i], " coeffs: ", p)
+    K.append(p[0])
+    n.append(p[1])
 
-p, pcov = curve_fit(f_jmak, fit_t, fit_y, sigma=None, method="lm", jac=df_jmak, maxfev=1000)
-print("coeff: ", p, "; covar:")
-coef = describe(pcov)
-print(coef)
+print()
+p_naive = [np.average(K), np.average(n)]
+print("Naive method: ", p_naive)
+print("       stdev: ", [np.std(K), np.std(n)])
+
+p, pcov = curve_fit(f_jmak, fit_t, fit_y, sigma=None,
+                    method="lm", jac=df_jmak, maxfev=1000)
+print()
+print("Smart method: ", p)
+# coef = describe(pcov)
+# print(coef)
 
 fit_max = np.amax(fit_t)
-fit_min = np.exp(floor(np.log(fit_max) / 2) - 1)
+fit_min = np.exp(floor(np.log(fit_max) / 3))
 
 t_hat = np.linspace(fit_max, fit_min, 201)
 y_hat = f_jmak(t_hat, *p)
