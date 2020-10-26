@@ -17,14 +17,14 @@ tlim = [0, 600]
 labels = ["Run A",
           "Run B",
           "Run C",
-          "Run D"]
+          "Run D",
+          "Run E"]
 
 frames = [pd.read_csv("run-a/free_energy.csv"),
           pd.read_csv("run-b/free_energy.csv"),
           pd.read_csv("run-c/free_energy.csv"),
-          pd.read_csv("run-d/free_energy.csv")]
-
-colors = ["red", "green", "blue", "orange"]
+          pd.read_csv("run-d/free_energy.csv"),
+          pd.read_csv("run-e/free_energy.csv")]
 
 figsize=(10,6)
 
@@ -58,7 +58,7 @@ plt.ylabel("$\\log(-\\log(1-Y))$")
 for i, df in enumerate(frames):
     df = df[df["time"] > 0]
     df = df[df["fraction"] > 0]
-    plt.plot(jmak_x(df["time"]), jmak_y(df["fraction"]), color=colors[i], label=labels[i])
+    plt.plot(jmak_x(df["time"]), jmak_y(df["fraction"]), label=labels[i])
 
 # === Levenburg-Marquardt Least-Squares Fit ===
 
