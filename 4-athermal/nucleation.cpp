@@ -47,11 +47,9 @@ T boundary_value(const MMSP::grid<dim, T>& GRID, const vector<int>& x)
     if (!on_boundary)
         return GRID(x);
 
-    const bool on_prewet = (x[0] >= g0(GRID, 0) / 2) && (x[0] < g1(GRID, 0) / 2);
-    if (on_prewet)
-        return wetted;
-
-    return 0.0;
+    const double r = meshres * std::abs(x[0]);
+    const double r0 = meshres * (g1(GRID, 0) / 2);
+    return pf_tanh(r, r0); 
 }
 
 template <int dim, typename T>
