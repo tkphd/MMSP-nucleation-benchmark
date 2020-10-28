@@ -14,17 +14,29 @@ style.use("seaborn")
 title = "PFHub Benchmark 8.3"
 tlim = [0, 600]
 
-labels = ["Run A",
-          "Run B",
-          "Run C",
-          "Run D",
-          "Run E"]
+labels = [#"Run A",
+          #"Run B",
+          #"Run C",
+          #"Run D",
+          "Run E",
+          "Run F",
+          "Run G",
+          #"Run H",
+          "Run I",
+          #"Run J",
+]
 
-frames = [pd.read_csv("run-a/free_energy.csv"),
-          pd.read_csv("run-b/free_energy.csv"),
-          pd.read_csv("run-c/free_energy.csv"),
-          pd.read_csv("run-d/free_energy.csv"),
-          pd.read_csv("run-e/free_energy.csv")]
+frames = [#pd.read_csv("run-a/free_energy.csv"),
+          #pd.read_csv("run-b/free_energy.csv"),
+          #pd.read_csv("run-c/free_energy.csv"),
+          #pd.read_csv("run-d/free_energy.csv"),
+          pd.read_csv("run-e/free_energy.csv"),
+          pd.read_csv("run-f/free_energy.csv"),
+          pd.read_csv("run-g/free_energy.csv"),
+          #pd.read_csv("run-h/free_energy.csv"),
+          pd.read_csv("run-i/free_energy.csv"),
+          #pd.read_csv("run-j/free_energy.csv"),
+]
 
 figsize=(10,6)
 
@@ -89,10 +101,12 @@ print("       stdev: ", [np.std(K), np.std(n)])
 
 p, pcov = curve_fit(f_jmak, fit_t, fit_y, sigma=None,
                     method="lm", jac=df_jmak, maxfev=1000)
+
 print()
 print("Smart method: ", p)
-# coef = describe(pcov)
-# print(coef)
+print("Covariance Matrix")
+print(pcov)
+perr = np.sqrt(np.diag(pcov))
 
 fit_max = np.amax(fit_t)
 fit_min = np.exp(floor(np.log(fit_max) / 3))
@@ -110,4 +124,39 @@ plt.xlim([0, tmax])
 plt.ylim([-10, 2])
 plt.legend(loc="best")
 plt.savefig("avrami.png", dpi=400, bbox_inches="tight")
+plt.close()
+
+# === Linear Plots ===
+
+plt.figure(figsize=figsize)
+plt.title(title)
+plt.xlabel("$t$")
+plt.ylabel("$Y$")
+
+for i, df in enumerate(frames):
+    df = df[df["time"] > 0]
+    df = df[df["fraction"] > 0]
+    plt.plot(df["time"], df["fraction"], label=labels[i])
+
+plt.plot(t_hat, y_hat, "-.k", label=eqn)
+
+upr_p = p + perr
+lwr_p = p - perr
+
+upper = f_jmak(t_hat, *upr_p)
+lower = f_jmak(t_hat, *lwr_p)
+
+it = np.argsort(t_hat)
+plt.fill_between(
+    t_hat[it], upper[it], y_hat[it], edgecolor=None, facecolor="silver", zorder=1, label=None
+)
+plt.fill_between(
+    t_hat[it], lower[it], y_hat[it], edgecolor=None, facecolor="silver", zorder=1, label=None
+)
+
+tmin, tmax = plt.xlim()
+#plt.xlim([0, tmax])
+#plt.ylim([-10, 2])
+plt.legend(loc="best")
+plt.savefig("linear.png", dpi=400, bbox_inches="tight")
 plt.close()
