@@ -49,7 +49,7 @@ T boundary_value(const MMSP::grid<dim, T>& GRID, const vector<int>& x)
 
     const double r = meshres * std::abs(x[0]);
     const double r0 = meshres * (g1(GRID, 0) / 2);
-    return 0.9 * pf_tanh(r, r0);
+    return wetted * pf_tanh(r, r0);
 }
 
 template <int dim, typename T>
