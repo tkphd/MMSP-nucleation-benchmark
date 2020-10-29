@@ -15,10 +15,10 @@ title = "PFHub Benchmark 8.3"
 tlim = [0, 600]
 p0 = (5.0e-8, 3.0) # initial guess for non-linear solver
 
-labels = [#"Run A",
-          #"Run B",
-          #"Run C",
-          #"Run D",
+labels = ["Run A",
+          "Run B",
+          "Run C",
+          "Run D",
           "Run E",
           "Run F",
           "Run G",
@@ -27,10 +27,10 @@ labels = [#"Run A",
           #"Run J",
 ]
 
-frames = [#pd.read_csv("run-a/free_energy.csv"),
-          #pd.read_csv("run-b/free_energy.csv"),
-          #pd.read_csv("run-c/free_energy.csv"),
-          #pd.read_csv("run-d/free_energy.csv"),
+frames = [pd.read_csv("run-a/free_energy.csv"),
+          pd.read_csv("run-b/free_energy.csv"),
+          pd.read_csv("run-c/free_energy.csv"),
+          pd.read_csv("run-d/free_energy.csv"),
           pd.read_csv("run-e/free_energy.csv"),
           pd.read_csv("run-f/free_energy.csv"),
           pd.read_csv("run-g/free_energy.csv"),
@@ -104,17 +104,18 @@ for i, df in enumerate(frames):
     fit_y = np.append(fit_y, y)
 
 print()
-p_naive = [np.average(K), np.average(n)]
-print("Individual fit: K={0:.3e} n={1:.3e}".format(p_naive[0], p_naive[1]))
-print("         stdev:   {0:.3e}   {1:.3e}".format(np.std(K), np.std(n)))
+p_naive = np.array([np.average(K), np.average(n)])
+p_nstd = np.array([np.std(K), np.std(n)])
+print("Individual fit: K={0:.3e} n={1:.3e}".format(*p_naive))
+print("         stdev:   {0:.3e}   {1:.3e}".format(*p_nstd))
 
 p, pcov = curve_fit(f_jmak, fit_t, fit_y, p0=p0, sigma=None,
                     method="lm", jac=df_jmak, maxfev=2000)
 perr = np.sqrt(np.diag(pcov))
 
 print()
-print("Collective fit: K={0:.3e} n={1:.3e}".format(p[0], p[1]))
-print("         error:   {0:.3e}   {1:.3e}".format(perr[0], perr[1]))
+print("Collective fit: K={0:.3e} n={1:.3e}".format(*p))
+print("         error:   {0:.3e}   {1:.3e}".format(*perr))
 
 fit_max = np.amax(fit_t)
 fit_min = np.exp(floor(np.log(fit_max) / 3))
@@ -163,8 +164,9 @@ plt.fill_between(
 )
 
 tmin, tmax = plt.xlim()
-#plt.xlim([0, tmax])
-#plt.ylim([-10, 2])
+plt.xlim([0, tmax])
+ymin, ymax = plt.ylim()
+plt.ylim([0, ymax])
 plt.legend(loc="best")
 plt.savefig("linear.png", dpi=400, bbox_inches="tight")
 plt.close()
