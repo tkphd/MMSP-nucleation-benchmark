@@ -13,6 +13,7 @@ style.use("seaborn")
 
 title = "PFHub Benchmark 8.2"
 tlim = [0, 200]
+p0 = (2.0e-4, 2.0) # initial guess for non-linear solver
 
 labels = ["Run A",
           "Run B",
@@ -76,7 +77,7 @@ for i, df in enumerate(frames):
     fit_y = np.append(fit_y, df["fraction"])
 
     # Fit this dataset & print coeffs
-    p, pcov = curve_fit(f_jmak, df["time"], df["fraction"], sigma=None,
+    p, pcov = curve_fit(f_jmak, df["time"], df["fraction"], p0=p0,
                         method="lm", jac=df_jmak, maxfev=1000)
     print(labels[i], " coeffs: ", p)
     K.append(p[0])
@@ -84,13 +85,16 @@ for i, df in enumerate(frames):
 
 print()
 p_naive = [np.average(K), np.average(n)]
-print("Naive method: ", p_naive)
-print("       stdev: ", [np.std(K), np.std(n)])
-
 print()
-p, pcov = curve_fit(f_jmak, fit_t, fit_y, sigma=None,
+print("Individual fit: K={0:.3e} n={1:.3e}".format(np.average(K), np.average(n)))
+print("         stdev:   {0:.3e}   {1:.3e}".format(np.std(K), np.std(n)))
+
+p, pcov = curve_fit(f_jmak, fit_t, fit_y, p0=p0,
                     method="lm", jac=df_jmak, maxfev=1000)
-print("Smart method: ", p)
+perr = np.sqrt(np.diag(pcov))
+print()
+print("Collective fit: K={0:.3e} n={1:.3e}".format(p[0], p[1]))
+print("         error:   {0:.3e}   {1:.3e}".format(perr[0], perr[1]))
 #coef = describe(pcov)
 #print(coef)
 

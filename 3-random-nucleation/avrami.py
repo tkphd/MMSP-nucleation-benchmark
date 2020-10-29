@@ -13,6 +13,7 @@ style.use("seaborn")
 
 title = "PFHub Benchmark 8.3"
 tlim = [0, 600]
+p0 = (5.0e-8, 3.0) # initial guess for non-linear solver
 
 labels = [#"Run A",
           #"Run B",
@@ -70,7 +71,11 @@ plt.ylabel("$\\log(-\\log(1-Y))$")
 for i, df in enumerate(frames):
     df = df[df["time"] > 0]
     df = df[df["fraction"] > 0]
-    plt.plot(jmak_x(df["time"]), jmak_y(df["fraction"]), label=labels[i])
+
+    t = np.array(df["time"])
+    y = np.array(df["fraction"])
+
+    plt.plot(jmak_x(t), jmak_y(y), label=labels[i])
 
 # === Levenburg-Marquardt Least-Squares Fit ===
 
@@ -84,29 +89,32 @@ for i, df in enumerate(frames):
     df = df[df["time"] > 0]
     df = df[df["fraction"] > 0]
 
-    fit_t = np.append(fit_t, df["time"])
-    fit_y = np.append(fit_y, df["fraction"])
+    t = np.array(df["time"])
+    y = np.array(df["fraction"])
 
     # Fit this dataset & print coeffs
-    p, pcov = curve_fit(f_jmak, df["time"], df["fraction"], sigma=None,
-                        method="lm", jac=df_jmak, maxfev=1000)
+    p, pcov = curve_fit(f_jmak, t, y, p0=p0, sigma=None,
+                        method="lm", jac=df_jmak, maxfev=2000)
     print(labels[i], " coeffs: ", p)
+
     K.append(p[0])
     n.append(p[1])
 
+    fit_t = np.append(fit_t, t)
+    fit_y = np.append(fit_y, y)
+
 print()
 p_naive = [np.average(K), np.average(n)]
-print("Naive method: ", p_naive)
-print("       stdev: ", [np.std(K), np.std(n)])
+print("Individual fit: K={0:.3e} n={1:.3e}".format(p_naive[0], p_naive[1]))
+print("         stdev:   {0:.3e}   {1:.3e}".format(np.std(K), np.std(n)))
 
-p, pcov = curve_fit(f_jmak, fit_t, fit_y, sigma=None,
-                    method="lm", jac=df_jmak, maxfev=1000)
+p, pcov = curve_fit(f_jmak, fit_t, fit_y, p0=p0, sigma=None,
+                    method="lm", jac=df_jmak, maxfev=2000)
+perr = np.sqrt(np.diag(pcov))
 
 print()
-print("Smart method: ", p)
-print("Covariance Matrix")
-print(pcov)
-perr = np.sqrt(np.diag(pcov))
+print("Collective fit: K={0:.3e} n={1:.3e}".format(p[0], p[1]))
+print("         error:   {0:.3e}   {1:.3e}".format(perr[0], perr[1]))
 
 fit_max = np.amax(fit_t)
 fit_min = np.exp(floor(np.log(fit_max) / 3))
