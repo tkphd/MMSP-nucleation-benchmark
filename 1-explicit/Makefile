@@ -7,9 +7,13 @@ incdir = $(MMSP_PATH)/include
 
 # compilers/flags
 compiler = g++
-pcompiler = mpic++
 flags = -O3 -I $(incdir)
+
+pcompiler = mpic++
 pflags = $(flags) -include mpi.h
+
+icompiler = icc
+iflags = -O3 -qopenmp -Dcimg_display=0 -I $(incdir) -std=c++11 -xCORE-AVX2
 
 all: mmsp2norm nuc8.1a nuc8.1b nuc8.1c nuc8.1d1 nuc8.1d2 nuc8.1d3 nuc8.1d4 nuc8.1d5 nuc8.1d6 nuc8.1d7
 .PHONY: all clean
