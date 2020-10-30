@@ -26,6 +26,10 @@ https://stackoverflow.com/a/40898020) on StackOverflow.
 
 This folder implements Problem 8.4: Athermal Nucleation.
 
+## 7-initial-nucleation
+
+This folder modifies Problem 8.3 to add a single nucleus at *t*=0.
+
 ---
 
 CImg is distributed under the [CeCILL](

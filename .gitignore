@@ -3,6 +3,7 @@
 1-explicit/nuc8.1*
 2-initial-nucleation/nucleation
 3-random-nucleation/nucleation
+7-random-nucleation/nucleation
 4-athermal/mmsp2norm
 4-athermal/nuc8.4*
 4-athermal/nucleation
