@@ -11,7 +11,7 @@ from scipy.stats import chisquare, describe
 
 style.use("seaborn")
 
-title = "PFHub Benchmark 8.3"
+title = "MODIFIED Benchmark 8.3"
 tlim = [0, 600]
 p0 = (5.0e-8, 3.0) # initial guess for non-linear solver
 
@@ -19,24 +19,28 @@ labels = ["Run A",
           "Run B",
           "Run C",
           "Run D",
-          "Run E",
-          "Run F",
-          "Run G",
+          #"Run E",
+          #"Run F",
+          #"Run G",
           #"Run H",
-          "Run I",
+          #"Run I",
           #"Run J",
+          #"Run K",
+          #"Run L",
 ]
 
 frames = [pd.read_csv("run-a/free_energy.csv"),
           pd.read_csv("run-b/free_energy.csv"),
           pd.read_csv("run-c/free_energy.csv"),
           pd.read_csv("run-d/free_energy.csv"),
-          pd.read_csv("run-e/free_energy.csv"),
-          pd.read_csv("run-f/free_energy.csv"),
-          pd.read_csv("run-g/free_energy.csv"),
+          #pd.read_csv("run-e/free_energy.csv"),
+          #pd.read_csv("run-f/free_energy.csv"),
+          #pd.read_csv("run-g/free_energy.csv"),
           #pd.read_csv("run-h/free_energy.csv"),
-          pd.read_csv("run-i/free_energy.csv"),
+          #pd.read_csv("run-i/free_energy.csv"),
           #pd.read_csv("run-j/free_energy.csv"),
+          #pd.read_csv("run-k/free_energy.csv"),
+          #pd.read_csv("run-l/free_energy.csv"),
 ]
 
 figsize=(10,6)

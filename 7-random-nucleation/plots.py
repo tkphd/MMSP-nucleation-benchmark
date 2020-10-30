@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-title = "PFHub Benchmark 8.3"
+title = "MODIFIED Benchmark 8.3"
 tlim = [0, 600]
 
 labels = ["Run A",
