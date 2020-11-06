@@ -52,6 +52,7 @@ double free_energy(grid<dim,T>& Grid)
 
 	double energy = 0.0;
 
+	#pragma omp parallel for reduction(+:energy)
 	for (int n = 0; n < nodes(Grid); n++) {
 		vector<int> x = position(Grid, n);
 		double phi = Grid(n);
@@ -85,6 +86,7 @@ double solid_frac(grid<dim,T>& Grid)
     double f = 0.0;
     double N = nodes(Grid);
 
+	#pragma omp parallel for reduction(+:f)
 	for (int n = 0; n < nodes(Grid); n++)
 		f += Grid(n);
 
@@ -130,6 +132,7 @@ void generate(int dim, const char* filename)
 		}
 
 		// Embed a single seed in the middle of the domain
+		#pragma omp parallel for
 		for (int n = 0; n < nodes(initGrid); n++) {
 			const vector<int> x = position(initGrid, n);
 			const double r = meshres * std::sqrt(x * x);
@@ -183,6 +186,7 @@ void update(grid<dim,T>& oldGrid, int steps)
 		if (rank==0)
 			print_progress(step, steps);
 
+		#pragma omp parallel for
 		for (int n = 0; n < nodes(oldGrid); n++) {
             vector<int> x = position(oldGrid, n);
 			T phi = oldGrid(n);
@@ -216,6 +220,8 @@ void update(grid<dim,T>& oldGrid, int steps)
 
     grid<dim,T> nrgGrid(oldGrid);
     ghostswap(nrgGrid);
+
+	#pragma omp parallel for
     for (int n = 0; n < nodes(nrgGrid); n++) {
         vector<int> x = position(nrgGrid, n);
         double phi = oldGrid(x);
