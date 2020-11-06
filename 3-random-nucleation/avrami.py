@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import curve_fit
 from scipy.stats import chisquare, describe
-from string import ascii_letters
+from string import ascii_letters as letters
 
 style.use("seaborn")
 
@@ -37,11 +37,11 @@ frames = [
     pd.read_csv("run-m/free_energy.csv"),
     pd.read_csv("run-n/free_energy.csv"),
     pd.read_csv("run-o/free_energy.csv"),
-    #pd.read_csv("run-p/free_energy.csv"),
-    #pd.read_csv("run-q/free_energy.csv"),
-    #pd.read_csv("run-r/free_energy.csv"),
-    #pd.read_csv("run-s/free_energy.csv"),
-    #pd.read_csv("run-t/free_energy.csv"),
+    pd.read_csv("run-p/free_energy.csv"),
+    pd.read_csv("run-q/free_energy.csv"),
+    pd.read_csv("run-r/free_energy.csv"),
+    pd.read_csv("run-s/free_energy.csv"),
+    pd.read_csv("run-t/free_energy.csv"),
 ]
 
 figsize = (10, 6)
@@ -91,6 +91,7 @@ for i, df in enumerate(frames):
     t = np.array(df["time"])
     y = np.array(df["fraction"])
 
+    run = "Run {}".format(letters[i + 26])
     plt.plot(jmak_x(t), jmak_y(y), label=None)
 
 # === Levenburg-Marquardt Least-Squares Fit ===
@@ -113,7 +114,7 @@ for i, df in enumerate(frames):
     # Fit this dataset & print coeffs
     p, pcov = curve_fit(f_jmak, t, y, p0=p0, sigma=None,
                         method="lm", jac=df_jmak, maxfev=2000)
-    print("Run", ascii_letters[i + 26], "coeffs:", p)
+    print("Run", letters[i + 26], "coeffs:", p)
 
     K.append(p[0])
     n.append(p[1])
@@ -165,22 +166,20 @@ plt.fill_between(
     jx[it], lower[it], jy[it], edgecolor=None, facecolor="silver", zorder=1, label=None
 )
 
-t_naive = np.linspace(fit_max, fit_min, 201)
-y_naive = f_jmak(t_naive, *p_naive)
+y_naive = f_jmak(t_hat, *p_naive)
 
-jx_naive = jmak_x(t_naive)
 jy_naive = jmak_y(y_naive)
 eqn_naive = "$1-\\exp\{-(%.1f \\pm %.1f) \\times 10^{-9} \\times [t - (%.2f \\pm %.2f)]^{%.2f \\pm %.2f}\}$" % (
     sigfig(p_naive[0] * 1e9, 4), sigfig(p_nstd[0] * 1e9, 4),
     sigfig(p_naive[2], 4), sigfig(p_nstd[2], 4),
     sigfig(p_naive[1], 4), sigfig(p_nstd[1], 4)
 )
-plt.plot(jx_naive, jy_naive, "-.b", label=eqn_naive)
+plt.plot(jx, jy_naive, "-.b", label=eqn_naive)
 
 tmin, tmax = plt.xlim()
 plt.xlim([0, tmax])
 plt.ylim([-10, 2])
-plt.legend(loc="best")
+legend = plt.legend(loc="best", fontsize="small")
 plt.savefig("avrami.png", dpi=400, bbox_inches="tight")
 plt.close()
 
@@ -194,6 +193,7 @@ plt.ylabel("$Y$")
 for i, df in enumerate(frames):
     df = df[df["time"] > 0]
     df = df[df["fraction"] > 0]
+    run = "Run {}".format(letters[i + 26])
     plt.plot(df["time"], df["fraction"], label=None)
 
 plt.plot(t_hat, y_hat, "-.k", label=eqn)
@@ -212,27 +212,27 @@ plt.fill_between(
     t_hat[it], lower[it], y_hat[it], edgecolor=None, facecolor="silver", zorder=1, label=None
 )
 
-plt.plot(t_naive, y_naive, "-.b", label=eqn_naive)
+plt.plot(t_hat, y_naive, "-.b", label=eqn_naive)
 
 """
 upr_p = p_naive + p_nstd
 lwr_p = p_naive - p_nstd
 
-upper = f_jmak(t_naive, *upr_p)
-lower = f_jmak(t_naive, *lwr_p)
+upper = f_jmak(t_hat, *upr_p)
+lower = f_jmak(t_hat, *lwr_p)
 
-it = np.argsort(t_naive)
+it = np.argsort(t_hat)
 plt.fill_between(
-    t_naive[it], upper[it], y_naive[it], edgecolor=None, facecolor="silver", zorder=1, label=None, alpha=0.5
+    t_hat[it], upper[it], y_naive[it], edgecolor=None, facecolor="silver", zorder=1, label=None, alpha=0.5
 )
 plt.fill_between(
-    t_naive[it], lower[it], y_naive[it], edgecolor=None, facecolor="silver", zorder=1, label=None, alpha=0.5
+    t_hat[it], lower[it], y_naive[it], edgecolor=None, facecolor="silver", zorder=1, label=None, alpha=0.5
 )
 """
 
 tmin, tmax = plt.xlim()
 plt.xlim([0, tmax])
 plt.ylim([0, 1])
-plt.legend(loc="best")
+legend = plt.legend(loc="best", fontsize="small")
 plt.savefig("linear.png", dpi=400, bbox_inches="tight")
 plt.close()
