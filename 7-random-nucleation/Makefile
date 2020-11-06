@@ -6,8 +6,11 @@
 incdir = $(MMSP_PATH)/include
 
 # compilers/flags
-compiler = g++
-flags = -O3 -fopenmp -Dcimg_display=0 -I $(incdir)
+# compiler = g++
+# flags = -O3 -fopenmp -Dcimg_display=0 -I $(incdir) -std=c++11
+
+compiler = icpc
+flags = -Ofast -qopenmp -Dcimg_display=0 -I $(incdir) -std=c++11
 
 all: nucleation
 .PHONY: all clean

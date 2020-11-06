@@ -9,6 +9,9 @@ incdir = $(MMSP_PATH)/include
 compiler = g++
 flags = -O3 -fopenmp -I $(incdir)
 
+icompiler = /cluster/intel/composer_xe_2015/bin/icpc
+iflags = -O3 -qopenmp -I $(incdir) -std=c++11 -xCORE-AVX2
+
 all: mmsp2norm nuc8.4a nuc8.4b nuc8.4c nuc8.4d1 nuc8.4d2 nuc8.4d3 nuc8.4d4 nuc8.4d5 nuc8.4d6 nuc8.4d7 nuc8.4e
 .PHONY: all clean
 

@@ -7,7 +7,10 @@ incdir = $(MMSP_PATH)/include
 
 # compilers/flags
 compiler = g++
-flags = -O3 -I $(incdir) -fopenmp
+flags = -O3 -fopenmp -I $(incdir) -std=c++11
+
+# compiler = icpc
+# flags = -Ofast -qopenmp -I $(incdir) -std=c++11
 
 all: mmsp2norm nuc8.1a nuc8.1b nuc8.1c nuc8.1d1 nuc8.1d2 nuc8.1d3 nuc8.1d4 nuc8.1d5 nuc8.1d6 nuc8.1d7
 .PHONY: all clean

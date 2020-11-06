@@ -17,6 +17,7 @@ from string import ascii_letters as letters
 style.use("seaborn")
 
 title = "PFHub Benchmark 8.3 Pre-seed"
+
 tlim = [0, 600]
 p0 = (5.0e-8, 3.0) # initial guess for non-linear solver
 
