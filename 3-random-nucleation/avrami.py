@@ -140,7 +140,7 @@ print("         error:   {0:5.3e}   {1:5.3f}     {2:5.3f}".format(*perr))
 fit_max = np.amax(fit_t)
 fit_min = np.exp(floor(np.log(fit_max) / 3))
 
-t_hat = np.linspace(fit_max, fit_min, 201)
+t_hat = np.linspace(fit_min, fit_max, 201)
 y_hat = f_jmak(t_hat, *p)
 
 jx = jmak_x(t_hat)

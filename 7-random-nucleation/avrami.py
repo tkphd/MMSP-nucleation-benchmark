@@ -22,13 +22,13 @@ tlim = [0, 600]
 p0 = (5.0e-8, 3.0) # initial guess for non-linear solver
 
 frames = [
-    #pd.read_csv("run-a/free_energy.csv"),
-    #pd.read_csv("run-b/free_energy.csv"),
-    #pd.read_csv("run-c/free_energy.csv"),
-    #pd.read_csv("run-d/free_energy.csv"),
+    pd.read_csv("run-a/free_energy.csv"),
+    pd.read_csv("run-b/free_energy.csv"),
+    pd.read_csv("run-c/free_energy.csv"),
+    pd.read_csv("run-d/free_energy.csv"),
     pd.read_csv("run-e/free_energy.csv"),
     pd.read_csv("run-f/free_energy.csv"),
-    #pd.read_csv("run-g/free_energy.csv"),
+    pd.read_csv("run-g/free_energy.csv"),
     #pd.read_csv("run-h/free_energy.csv"),
     #pd.read_csv("run-i/free_energy.csv"),
     #pd.read_csv("run-j/free_energy.csv"),
@@ -139,7 +139,7 @@ print("         error:   {0:5.3e}   {1:5.3f}".format(*perr))
 fit_max = np.amax(fit_t)
 fit_min = np.exp(floor(np.log(fit_max) / 3))
 
-t_hat = np.linspace(fit_max, fit_min, 201)
+t_hat = np.linspace(fit_min, fit_max, 201)
 y_hat = f_jmak(t_hat, *p)
 
 jx = jmak_x(t_hat)
