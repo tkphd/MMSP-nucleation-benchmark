@@ -9,9 +9,12 @@
 #include <random>
 #include <set>
 
-#include "CImg.h"
 #include "MMSP.hpp"
 #include "nucleation.hpp"
+
+#ifdef COUNTING
+#include "CImg.h"
+#endif
 
 double g(double x)
 {
@@ -54,8 +57,8 @@ void embed_at(grid<dim,T>& Grid, vector<int> X0, double r0)
                 continue;
             const vector<int> z = x - X0;
 			const double r = meshres * std::sqrt(z * z);
-            const double phi = Grid(x) + pf_tanh(r, r0);
-            Grid(x) = std::min(phi, 1.0);
+            const double phi = Grid(x);
+            Grid(x) = (phi > 0) ? 1.0 : pf_tanh(r, r0);
         }
     }
 }
@@ -114,6 +117,7 @@ double solid_frac(grid<dim,T>& Grid)
 	return f / N;
 }
 
+#ifdef COUNTING
 template <int dim, typename T>
 int count_particles(grid<dim,T>& Grid)
 {
@@ -141,6 +145,7 @@ int count_particles(grid<dim,T>& Grid)
 
     return shades.size();
 }
+#endif
 
 void generate(int dim, const char* filename)
 {
@@ -203,15 +208,22 @@ void generate(int dim, const char* filename)
 
 		output(initGrid, filename);
 
+        #ifdef COUNTING
         int count = count_particles(initGrid);
+        #endif
 
 		double F = free_energy(initGrid);
         double f = solid_frac(initGrid);
 
 		if (rank == 0) {
 			fh = fopen("free_energy.csv", "w+");
+			#ifdef COUNTING
 			fprintf(fh, "time,energy,fraction,particles\n");
 			fprintf(fh, "%lf,%lf,%lf,%d\n", 0.0, F, f, count);
+            #else
+			fprintf(fh, "time,energy,fraction\n");
+			fprintf(fh, "%lf,%lf,%lf\n", 0.0, F, f);
+            #endif
 			fclose(fh);
 		}
 	}
@@ -287,10 +299,16 @@ void update(grid<dim,T>& oldGrid, int steps)
         	io_elapsed += io_dt;
             double F = free_energy(oldGrid);
             double f = solid_frac(oldGrid);
+            #ifdef COUNTING
             int count = count_particles(oldGrid);
+            #endif
 
             if (rank == 0) {
+                #ifdef COUNTING
                 fprintf(fh, "%lf,%lf,%lf,%d\n", elapsed, F, f, count);
+                #else
+                fprintf(fh, "%lf,%lf,%lf\n", elapsed, F, f);
+                #endif
                 fflush(fh);
             }
         }
