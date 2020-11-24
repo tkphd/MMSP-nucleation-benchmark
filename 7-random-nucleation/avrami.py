@@ -15,12 +15,14 @@ from scipy.stats import chisquare, describe
 from string import ascii_letters as letters
 
 style.use("seaborn")
+cmap = plt.get_cmap("viridis")
 
 title = "PFHub Benchmark 8.3 Pre-seed"
 
 tlim = [0, 600]
 p0 = (5.0e-8, 3.0) # initial guess for non-linear solver
 
+offset = 0 # missing A, B
 frames = [
     pd.read_csv("run-a/free_energy.csv"),
     pd.read_csv("run-b/free_energy.csv"),
@@ -29,15 +31,15 @@ frames = [
     pd.read_csv("run-e/free_energy.csv"),
     pd.read_csv("run-f/free_energy.csv"),
     pd.read_csv("run-g/free_energy.csv"),
-    #pd.read_csv("run-h/free_energy.csv"),
-    #pd.read_csv("run-i/free_energy.csv"),
-    #pd.read_csv("run-j/free_energy.csv"),
-    #pd.read_csv("run-k/free_energy.csv"),
-    #pd.read_csv("run-l/free_energy.csv"),
-    #pd.read_csv("run-m/free_energy.csv"),
-    #pd.read_csv("run-n/free_energy.csv"),
-    #pd.read_csv("run-o/free_energy.csv"),
-    #pd.read_csv("run-p/free_energy.csv"),
+    pd.read_csv("run-h/free_energy.csv"),
+    pd.read_csv("run-i/free_energy.csv"),
+    pd.read_csv("run-j/free_energy.csv"),
+    pd.read_csv("run-k/free_energy.csv"),
+    pd.read_csv("run-l/free_energy.csv"),
+    pd.read_csv("run-m/free_energy.csv"),
+    pd.read_csv("run-n/free_energy.csv"),
+    pd.read_csv("run-o/free_energy.csv"),
+    pd.read_csv("run-p/free_energy.csv"),
     #pd.read_csv("run-q/free_energy.csv"),
     #pd.read_csv("run-r/free_energy.csv"),
     #pd.read_csv("run-s/free_energy.csv"),
@@ -76,34 +78,39 @@ def sigfig(x, n):
     shifted_dp = x / (10 ** e)  # decimal place shifted n d.p.
     return np.around(shifted_dp) * (10 ** e)  # round and revert
 
-# === Avrami/JMAK Plots ===
+def harmonic_mean(x):
+    y = 0.0
+    for i in x:
+        y += 1.0 / i
 
-plt.figure(figsize=figsize)
+    return len(x) / y
+
+# === Prepare Plot Objects ===
+
+plt.figure("avrami", figsize=figsize)
 plt.title(title)
 plt.xlabel("$\\log(t)$")
 plt.ylabel("$\\log(-\\log(1-Y))$")
 
-for i, df in enumerate(frames):
-    df = df[df["time"] > 0]
-    df = df[df["fraction"] > 0]
-    df = df[df["fraction"] < 1]
+plt.figure("linear", figsize=figsize)
+plt.title(title)
+plt.xlabel("$t$")
+plt.ylabel("$Y$")
 
-    t = np.array(df["time"])
-    y = np.array(df["fraction"])
+# === Avrami/JMAK Plots ===
 
-    run = "Run {}".format(letters[i + 26])
-    plt.plot(jmak_x(t), jmak_y(y), label=None)
-
-# === Levenburg-Marquardt Least-Squares Fit ===
-
-fit_t = np.array([])
-fit_y = np.array([])
 
 K = []
 n = []
 t0 = []
 
+fit_t = np.array([])
+fit_y = np.array([])
+
 for i, df in enumerate(frames):
+    run = "Run {}".format(letters[i + 26 + offset])
+    color = cmap((i + offset) / (len(frames) + offset))
+
     df = df[df["time"] > 0]
     df = df[df["fraction"] > 0]
     df = df[df["fraction"] < 1]
@@ -112,15 +119,29 @@ for i, df in enumerate(frames):
     y = np.array(df["fraction"])
 
     # Fit this dataset & print coeffs
+
     p, pcov = curve_fit(f_jmak, t, y, p0=p0, sigma=None,
                         method="lm", jac=df_jmak, maxfev=2000)
-    print("Run", letters[i + 26], "coeffs:", p)
+    print(run, "coeffs:", p)
 
     K.append(p[0])
     n.append(p[1])
 
     fit_t = np.append(fit_t, t)
     fit_y = np.append(fit_y, y)
+
+    t_hat = np.linspace(np.amin(t), np.amax(t), 100, endpoint=False)
+    y_hat = f_jmak(t_hat, *p)
+
+    # Plot this dataset & its fit
+
+    plt.figure("linear")
+    plt.plot(t, y, label=run, color=color)
+    plt.plot(t_hat, y_hat, label=None, color="gray", alpha=0.7)
+
+    plt.figure("avrami")
+    plt.plot(jmak_x(t), jmak_y(y), label=run, color=color)
+    plt.plot(jmak_x(t_hat), jmak_y(y_hat), label=None, color="gray", alpha=0.7)
 
 print()
 p_naive = np.array([np.average(K), np.average(n)])
@@ -148,6 +169,8 @@ eqn = "$1-\\exp\{-(%.2f \\pm %.2f) \\times 10^{-9} \\times t^{%.2f \\pm %.2f}\}$
     sigfig(p[0] * 1e9, 4), sigfig(perr[0] * 1e9, 4),
     sigfig(p[1], 4), sigfig(perr[1], 4)
 )
+
+plt.figure("avrami")
 plt.plot(jx, jy, "-.k", label=eqn)
 
 upr_p = p + perr
@@ -182,17 +205,7 @@ plt.close()
 
 # === Linear Plots ===
 
-plt.figure(figsize=figsize)
-plt.title(title)
-plt.xlabel("$t$")
-plt.ylabel("$Y$")
-
-for i, df in enumerate(frames):
-    df = df[df["time"] > 0]
-    df = df[df["fraction"] > 0]
-    run = "Run {}".format(letters[i + 26])
-    plt.plot(df["time"], df["fraction"], label=None)
-
+plt.figure("linear")
 plt.plot(t_hat, y_hat, "-.k", label=eqn)
 
 upr_p = p + perr
