@@ -32,10 +32,12 @@ double p_prime(double x)
 	return 30.0 * g(x);
 }
 
+#ifdef SMOOTHED
 double pf_tanh(double x, double r)
 {
 	return 0.5 * (1.0 - std::tanh((x - r) / std::sqrt(2)));
 }
+#endif
 
 namespace MMSP
 {
@@ -47,9 +49,18 @@ T boundary_value(const MMSP::grid<dim, T>& GRID, const vector<int>& x)
     if (!on_boundary)
         return GRID(x);
 
+    #ifdef SMOOTHED
     const double r = meshres * std::abs(x[0]);
-    const double r0 = meshres;
+    const double r0 = meshres  * (g1(GRID, 0) / 2);
     return wetted * pf_tanh(r, r0);
+
+    #else
+    const int R = (g1(GRID, 0) - g0(GRID, 0)) / 4;
+    if (x[0] <= -R || x[0] > R)
+        return 0.0;
+
+    return 0.9;
+    #endif
 }
 
 template <int dim, typename T>
